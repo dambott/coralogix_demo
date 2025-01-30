@@ -8,6 +8,7 @@ Astronomy Shop Demo is a re-implementation of the Coralogix OnlineBoutique Demo 
 > [!NOTE]
 > This project is currently deployed in us-west-2
 > The terraform state files are stored in a S3 Bucket in the same account as this project, using the Terraform S3 backend provider.
+> If multiple clusters are to be deployed in the same AWS account, change the cluster name for each one - it is used as a base for iam roles etc and it will fail if the role already exists
 
 ## TODO
 

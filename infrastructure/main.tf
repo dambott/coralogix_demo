@@ -13,9 +13,12 @@ data "aws_availability_zones" "available" {
     values = ["opt-in-not-required"]
   }
 }
-
 locals {
   cluster_name = var.cluster_name
+  # RFC 1918 IP ranges supported
+  remote_network_cidr = "172.16.0.0/16"
+  remote_node_cidr    = cidrsubnet(local.remote_network_cidr, 2, 0)
+  remote_pod_cidr     = cidrsubnet(local.remote_network_cidr, 2, 1)
 }
 
 resource "aws_iam_role" "cluster_admins" {
@@ -120,6 +123,16 @@ module "eks" {
       min_size     = var.min_size
       max_size     = var.max_size
       desired_size = var.desired_size
+    }
+  }
+  cluster_security_group_additional_rules = {
+    hybrid-all = {
+      cidr_blocks = [local.remote_network_cidr]
+      description = "Allow all traffic from remote node/pod network"
+      from_port   = 0
+      to_port     = 0
+      protocol    = "all"
+      type        = "ingress"
     }
   }
 }
