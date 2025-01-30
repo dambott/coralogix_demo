@@ -142,7 +142,7 @@ The user ARN needs to be added to the Trust Relationship section of the role and
 
 - Remove the Helm chart and Terraform
 
-Always stop the demo on the cluster before tearing the cluster down, because the demo creates 2 load balancers that terraform does not know abouto
+Always stop the demo on the cluster before tearing the cluster down, because the demo creates 2 load balancers that terraform does not know about
 
   ```bash
   cd helm
