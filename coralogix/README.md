@@ -1,0 +1,1 @@
+# Coralogix Team Configuration

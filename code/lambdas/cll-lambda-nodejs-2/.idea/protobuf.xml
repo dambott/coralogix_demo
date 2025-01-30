@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="BufFileManager">
+    <libraries>
+      <module>
+        <name>buf.build/googleapis/googleapis</name>
+        <path>$USER_HOME$/.cache/buf/v1/module/data/buf.build/googleapis/googleapis/12fe2e1f2c354438ae6bdf44d7a54b65</path>
+        <reference>buf.build/googleapis/googleapis:12fe2e1f2c354438ae6bdf44d7a54b65</reference>
+        <yaml>$USER_HOME$/.cache/buf/v1/module/data/buf.build/googleapis/googleapis/12fe2e1f2c354438ae6bdf44d7a54b65/buf.yaml</yaml>
+      </module>
+      <module>
+        <name>buf.build/googleapis/googleapis</name>
+        <path>$USER_HOME$/.cache/buf/v1/module/data/buf.build/googleapis/googleapis/d373b93b9c294fa3a5deff4bc7546297</path>
+        <reference>buf.build/googleapis/googleapis:d373b93b9c294fa3a5deff4bc7546297</reference>
+        <yaml>$USER_HOME$/.cache/buf/v1/module/data/buf.build/googleapis/googleapis/d373b93b9c294fa3a5deff4bc7546297/buf.yaml</yaml>
+      </module>
+      <module>
+        <name>buf.build/googleapis/googleapis</name>
+        <path>$USER_HOME$/.cache/buf/v1/module/data/buf.build/googleapis/googleapis/f503ec6637504fc3be424ad20a5a4225</path>
+        <reference>buf.build/googleapis/googleapis:f503ec6637504fc3be424ad20a5a4225</reference>
+        <yaml>$USER_HOME$/.cache/buf/v1/module/data/buf.build/googleapis/googleapis/f503ec6637504fc3be424ad20a5a4225/buf.yaml</yaml>
+      </module>
+    </libraries>
+  </component>
+</project>

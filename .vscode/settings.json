@@ -1,0 +1,12 @@
+{
+  "[python]": {
+    "editor.defaultFormatter": "ms-python.black-formatter"
+  },
+  "python.formatting.provider": "black",
+  "markdown.updateLinksOnFileMove.enabled": "prompt",
+  "markdown-preview-github-styles.colorTheme": "dark",
+  "markdown-preview-github-styles.darkTheme": "dark_dimmed",
+  "markdown-checkboxes.labelAfter": false,
+  "markdown-checkboxes.label": false,
+  "markdown-checkboxes.enable": true
+}

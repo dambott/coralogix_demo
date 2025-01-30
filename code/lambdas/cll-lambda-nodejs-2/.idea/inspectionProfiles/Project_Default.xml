@@ -1,0 +1,12 @@
+<component name="InspectionProjectProfileManager">
+  <profile version="1.0">
+    <option name="myName" value="Project Default" />
+    <inspection_tool class="PyUnresolvedReferencesInspection" enabled="$DEBUG$" level="WARNING" enabled_by_default="$DEBUG$">
+      <option name="ignoredIdentifiers">
+        <list>
+          <option value="Utils.authorization_connection.get_user_companies_scopes_async.reset_mock" />
+        </list>
+      </option>
+    </inspection_tool>
+  </profile>
+</component>
