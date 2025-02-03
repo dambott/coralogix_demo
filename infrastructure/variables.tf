@@ -1,7 +1,7 @@
 variable "cluster_name" {
   description = "K8s cluster name"
   type        = string
-  default     = "ob2-dev-cx498"
+  default     = "ob2-dev-cx498-uw1"
 }
 
 variable "cluster_version" {

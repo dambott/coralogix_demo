@@ -24,19 +24,25 @@ export CX_DOMAIN="cx498.coralogix.com"
 export CX_APPLICATION="rum-frontend"
 
 export EXPOSENAME=exposecollector
+export DEMO_NAMESPACE=astronomy-demo
+
+kubectl create namespace ${DEMO_NAMESPACE}
+oldns=`kubectl config view -o jsonpath={.contexts[].context.namespace}`
+echo $oldns
+kubectl config set-context --current --namespace ${DEMO_NAMESPACE}
 
 echo "Installing otel collector"
 
 # cd into otel-integration directory
 pushd otel-integration
 
-kubectl create secret generic coralogix-keys --from-literal=PRIVATE_KEY=${CORALOGIX_API_KEY}
+kubectl create secret generic coralogix-keys --from-literal=PRIVATE_KEY=${CORALOGIX_API_KEY} 
 
 helm upgrade \
 	--install otel-coralogix-integration ./otel-integration \
-       	--render-subchart-notes \
-	--set global.defaultApplicationName=${CX_APPLICATION} \
-	--set global.domain=${CX_DOMAIN} \
+       	--render-subchart-notes					\
+	--set global.defaultApplicationName=${CX_APPLICATION}	\
+	--set global.domain=${CX_DOMAIN}			\
        	--set global.clusterName=${CLUSTER}
 
 ready=`kubectl get daemonset coralogix-opentelemetry-agent | awk 'FNR==2{print $4}'`
@@ -48,11 +54,11 @@ done
 # Install override
 echo "Installing otel collector override"
 helm upgrade \
-	--install otel-coralogix-integration ./otel-integration \
-        --values override-otel.yaml \
-       	--render-subchart-notes \
-	--set global.defaultApplicationName=${CX_APPLICATION} \
-        --set global.domain=${CX_DOMAIN} \
+        --install otel-coralogix-integration ./otel-integration \
+        --values override-otel.yaml				\
+       	--render-subchart-notes 				\
+	--set global.defaultApplicationName=${CX_APPLICATION}	\
+        --set global.domain=${CX_DOMAIN}			\
        	--set global.clusterName=${CLUSTER}
 
 # Wait for it to start
@@ -94,20 +100,19 @@ sed -i '/PUBLIC_OTEL_EXPORTER_OTLP_TRACES_ENDPOINT/{n;s/.*/        value: '$rhs'
 # return from opentelemetry-demo directory
 popd
 
-# Create RUM secret key - NB: this will be visible in the browser so it is not really secret
-kubectl create secret generic coralogix-rum-key --from-literal=RUM_KEY=${CORALOGIX_RUM_KEY}
-
 echo
 echo "Install otel demo"
 
+# Create RUM secret key - NB: this will be visible in the browser so it is not really secret
+kubectl create secret generic coralogix-rum-key --from-literal=RUM_KEY=${CORALOGIX_RUM_KEY}
 
 # install otel demo
-helm install my-otel-demo ./opentelemetry-demo \
+helm install my-otel-demo ./opentelemetry-demo 	\
+    --namespace  ${DEMO_NAMESPACE}	 	\
     --set opentelemetry-collector.enabled=false \
-    --set jaeger.enabled=false \
-    --set prometheus.enabled=false \
+    --set jaeger.enabled=false 			\
+    --set prometheus.enabled=false 		\
     --set grafana.enabled=false 
-
 
 # wait for the frontend proxy to be ready
 while [[ $(kubectl get pods -l app.kubernetes.io/name=my-otel-demo-frontendproxy -o 'jsonpath={..status.conditions[?(@.type=="Ready")].status}') != "True" ]]; do echo "Waiting for otel demo to start (up to 5m)" && sleep 2; done
@@ -134,3 +139,6 @@ AWSEXPOSE+="$AWSURL"
 AWSEXPOSE+=":8080"
 echo "Endpoint to access demo:"
 echo $AWSEXPOSE
+
+# Restore namespace
+kubectl config set-context --current --namespace ${oldns}

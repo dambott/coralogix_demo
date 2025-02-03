@@ -47,12 +47,10 @@ As part of the deployment, some of the Error [feature flags](https://opentelemet
 
 The included OpenTelemetry Collector configuration has some modifications from the default otel-integration `values.yaml`.
 
-### Coralogix - NOT YET IMPLEMENTED
-By default, the OpenTelemetry Demo is deployed into a namespace called `astronomy-demo` and the OTEL Integration daemonset is deployed into a namespace called `monitoring`.
-
+By default, the OpenTelemetry Demo is deployed into a namespace called `astronomy-demo` as is the OTEL Integration aka otel collector. 
 ### Coralogix - NOT YET IMPLEMENTED
 
-The Coralogix folder contains the Terraform code to configure the Coralogix Team that the telemetry data from the cluster is being shipped to.
+The helm folder configures the Coralogix Team information for sending telemetry to Coralogix
 
 ## Getting Started
 
@@ -76,7 +74,7 @@ The Coralogix folder contains the Terraform code to configure the Coralogix Team
     region="<AWS region your bucket is in>"
     ```
 
-  - `infrastructure/variables.tf`
+  - `infrastructure/terraform.tfvars`
     - Update the following variables as needed:
 
       ```hcl

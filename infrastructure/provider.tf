@@ -1,9 +1,9 @@
 
 terraform {
   backend "s3" {
-    bucket = "coralogix-ob2-terraform-cx498-us-west-1"
+    bucket = "coralogix-ob2-terraform-cx498-us-west-2"
     key    = "terraform/eks"
-    region = "us-west-1"
+    region = "us-west-2"
   }
 
   required_providers {
