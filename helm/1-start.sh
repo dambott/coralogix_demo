@@ -33,6 +33,10 @@ kubectl config set-context --current --namespace ${DEMO_NAMESPACE}
 
 echo "Installing otel collector"
 
+pushd otel-integration/otel-integration
+helm dependency build
+popd
+
 # cd into otel-integration directory
 pushd otel-integration
 
