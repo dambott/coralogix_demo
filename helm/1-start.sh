@@ -35,10 +35,12 @@ echo "Installing otel collector"
 
 kubectl create secret generic coralogix-keys --from-literal=PRIVATE_KEY=${CORALOGIX_API_KEY} 
 
+helm repo add coralogix https://cgx.jfrog.io/artifactory/coralogix-charts-virtual
+helm repo update
 helm upgrade \
 	--install otel-coralogix-integration coralogix/otel-integration \
     --values otel-integration/values.yaml                           \
-    --version=0.0.139                                               \
+    --version=0.0.143                                               \
     --render-subchart-notes				                       	    \
 	--set global.defaultApplicationName=${CX_APPLICATION}	        \
 	--set global.domain=${CX_DOMAIN}		                       	\
