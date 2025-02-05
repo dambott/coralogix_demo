@@ -12,8 +12,8 @@ default:
         fieldRef:
           fieldPath: status.hostIP
     - name: OTEL_COLLECTOR_NAME
-#      value: "$(NODE)"
-      value: '{{ include "otel-demo.name" . }}-otelcol'
+      value: "$(NODE)"
+  #    value: '{{ include "otel-demo.name" . }}-otelcol'
     - name: OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE
       value: cumulative
     - name: OTEL_RESOURCE_ATTRIBUTES
@@ -361,7 +361,7 @@ components:
         value: frontend-web
       # This values will get overwritten by the 1-start.sh script to the correct expose url
       - name: PUBLIC_OTEL_EXPORTER_OTLP_TRACES_ENDPOINT
-        value: http://a52a424dceff04cb09b7845ce228dffe-597277576.us-west-1.elb.amazonaws.com:8080/v1/traces
+        value: http://ab1996e35beb846af81e0bb3bd7c9e7e-1447399581.us-west-2.elb.amazonaws.com:8080/v1/traces
           # The amazon url will change when things get setup
           # This is found from :
           # kubectl expose deployment my-otel-demo-otelcol  --port=8080 --target-port=4318 --name=awsexpose2 --type=LoadBalancer

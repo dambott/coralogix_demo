@@ -5,7 +5,7 @@ global:
   defaultSubsystemName: "integration"
   logLevel: "warn"
   collectionInterval: "30s"
-  version: "0.0.136"
+  version: "0.0.139"
 
   extensions:
     kubernetesDashboard:
@@ -40,11 +40,6 @@ opentelemetry-agent:
         secretKeyRef:
           name: coralogix-keys
           key: PRIVATE_KEY
-    - name: K8S_NODE_NAME
-      valueFrom:
-        fieldRef:
-          apiVersion: v1
-          fieldPath: spec.nodeName
     - name: OTEL_RESOURCE_ATTRIBUTES
       value: "k8s.node.name=$(K8S_NODE_NAME)"
     - name: KUBE_NODE_NAME
@@ -52,7 +47,42 @@ opentelemetry-agent:
         fieldRef:
           apiVersion: v1
           fieldPath: spec.nodeName
-
+  # Extra config for the collector
+  # This is used to add extra receivers, processors, exporters, and connectors
+  # to the "logs", "metrics", and "traces" pipelines and other pipelines managed by the chart.
+  # Processors are added at the end of the pipeline before batching.
+  # You cannot use this to add new pipelines, instead use the
+  # config.service.pipelines field to add new pipelines.
+  #extraConfig: {}
+  # extraConfig:
+  #   receivers:
+  #     otlp/3:
+  #       protocols:
+  #         grpc:
+  #           endpoint: ${env:MY_POD_IP}:4317
+  #         http:
+  #           endpoint: ${env:MY_POD_IP}:4318
+  #   processors:
+  #     batch: {}
+  #   exporters:
+  #     debug/2: {}
+  #   connectors:
+  #     spanmetrics/2:
+  #       metrics:
+  #         enabled: true
+  #   service:
+  #     pipelines:
+  #       logs:
+  #         receivers:
+  #         - otlp/3
+  #         processors:
+  #         - batch/2
+  #         exporters:
+  #         - debug/2
+  #       metrics:
+  #         receivers:
+  #         - otlp/3
+  #         - spanmetrics/2
   targetAllocator:
     enabled: false
     replicas: 1
@@ -204,7 +234,7 @@ opentelemetry-agent:
       enabled: false
      # Configures Host Metrics receiver to collect Entity Events.
     hostEntityEvents:
-      enabled: false
+      enabled: true
   config:
     extensions:
       zpages:
@@ -220,10 +250,6 @@ opentelemetry-agent:
           grpc:
             endpoint: ${env:MY_POD_IP}:4317
           http:
-            cors:
-              allowed_origins:
-                - "http://*"
-                - "https://*"
             endpoint: ${env:MY_POD_IP}:4318
       zipkin:
         endpoint: ${env:MY_POD_IP}:9411
@@ -457,7 +483,7 @@ opentelemetry-cluster-collector:
       enabled: false
     # Enables Kubernetes Resource collection for for resource catalog
     kubernetesResources:
-      enabled: false
+      enabled: true
 
   command:
     name: otelcol-contrib
@@ -473,7 +499,47 @@ opentelemetry-cluster-collector:
         fieldRef:
           apiVersion: v1
           fieldPath: spec.nodeName
-
+  # Extra config for the collector
+  # This is used to add extra receivers, processors, exporters, and connectors
+  # to the "logs", "metrics", and "traces" pipelines and other pipelines managed by the chart.
+  # Processors are added at the end of the pipeline before batching.
+  # You cannot use this to add new pipelines, instead use the
+  # config.service.pipelines field to add new pipelines.
+  extraConfig: {}
+  #extraConfig:
+  #   receivers:
+  #     otlp/3:
+  #       protocols:
+  #         grpc:
+  #           endpoint: ${env:MY_POD_IP}:4317
+  #         http:
+  #           endpoint: ${env:MY_POD_IP}:4318
+  #   processors:
+  #     batch: {}
+  #   exporters:
+  #     debug/2: {}
+  #   connectors:
+  #     spanmetrics/2:
+  #       metrics:
+  #         enabled: true
+  # service:
+  #   pipelines:
+  #     traces:
+  #       receivers:
+  #         - otlp
+  #       exporters:
+  #         - coralogix
+  #       logs:
+  #         receivers:
+  #         - otlp/3
+  #         processors:
+  #         - batch/2
+  #         exporters:
+  #         - debug/2
+  #       metrics:
+  #         receivers:
+  #         - otlp/3
+  #         - spanmetrics/2
   config:
     extensions:
       zpages:
@@ -481,6 +547,17 @@ opentelemetry-cluster-collector:
       pprof:
         endpoint: localhost:1777
     receivers:
+      otlp:
+        protocols:
+          grpc:
+            endpoint: ${env:MY_POD_IP}:4317
+          http:
+            # This is needed to allow the frontend traces from the RUM in the browser to access the collector to be ingested
+            cors:
+              allowed_origins:
+              - "http://*"
+              - "https://*"
+            endpoint: ${env:MY_POD_IP}:4318
       k8s_cluster:
         collection_interval: "{{.Values.global.collectionInterval}}"
         allocatable_types_to_report: [cpu, memory]
@@ -663,6 +740,8 @@ opentelemetry-cluster-collector:
             - transform/kube-events
             - memory_limiter
             - batch
+          receivers:
+            - otlp
         metrics:
           exporters:
             - coralogix
@@ -679,8 +758,23 @@ opentelemetry-cluster-collector:
             - otlp
             - prometheus
             - k8s_cluster
+        traces:
+          exporters:
+            - coralogix
+          processors:
+            - memory_limiter
+            - batch
+          receivers:
+            - otlp
   tolerations:
     - operator: Exists
+
+  startupProbe:
+    failureThreshold: 3
+    initialDelaySeconds: 15
+    periodSeconds: 15
+    httpGet:
+      port: 13133
 
   resources:
     requests:
@@ -694,7 +788,7 @@ opentelemetry-cluster-collector:
     otlp:
       enabled: true
     otlp-http:
-      enabled: false
+      enabled: true
     jaeger-compact:
       enabled: false
     jaeger-thrift:
@@ -750,6 +844,43 @@ opentelemetry-gateway:
         fieldRef:
           apiVersion: v1
           fieldPath: spec.nodeName
+  # Extra config for the collector
+  # This is used to add extra receivers, processors, exporters, and connectors
+  # to the "logs", "metrics", and "traces" pipelines and other pipelines managed by the chart.
+  # Processors are added at the end of the pipeline before batching.
+  # You cannot use this to add new pipelines, instead use the
+  # config.service.pipelines field to add new pipelines.
+  extraConfig: {}
+  # extraConfig:
+  #   receivers:
+  #     otlp/3:
+  #       protocols:
+  #         grpc:
+  #           endpoint: ${env:MY_POD_IP}:4317
+  #         http:
+  #           endpoint: ${env:MY_POD_IP}:4318
+  #   processors:
+  #     batch: {}
+  #   exporters:
+  #     debug/2: {}
+  #   connectors:
+  #     spanmetrics/2:
+  #       metrics:
+  #         enabled: true
+  #   service:
+  #     pipelines:
+  #       logs:
+  #         receivers:
+  #         - otlp/3
+  #         processors:
+  #         - batch/2
+  #         exporters:
+  #         - debug/2
+  #       metrics:
+  #         receivers:
+  #         - otlp/3
+  #         - spanmetrics/2
+
   presets:
     fleetManagement:
       enabled: false
@@ -890,7 +1021,6 @@ opentelemetry-gateway:
             - coralogix
           processors:
             - memory_limiter
-            - tail_sampling
             - batch
           receivers:
             - otlp

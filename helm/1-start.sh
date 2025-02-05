@@ -1,6 +1,6 @@
 # Before you begin:
 #
-# Modify the CLUSTER variable (below) to match the otel collector value 'clusterName' in ./override-otel.yaml
+# Set the CLUSTER variable (below) to be the k8s cluster name
 # Set the env var CORALOGIX_API_KEY to your Coralogix ingestion key
 # with:
 # export CORALOGIX_API_KEY="<my key value>"
@@ -33,46 +33,26 @@ kubectl config set-context --current --namespace ${DEMO_NAMESPACE}
 
 echo "Installing otel collector"
 
-pushd otel-integration/otel-integration
-helm dependency build
-popd
-
-# cd into otel-integration directory
-pushd otel-integration
-
 kubectl create secret generic coralogix-keys --from-literal=PRIVATE_KEY=${CORALOGIX_API_KEY} 
 
 helm upgrade \
-	--install otel-coralogix-integration ./otel-integration \
-       	--render-subchart-notes					\
-	--set global.defaultApplicationName=${CX_APPLICATION}	\
-	--set global.domain=${CX_DOMAIN}			\
-       	--set global.clusterName=${CLUSTER}
+	--install otel-coralogix-integration coralogix/otel-integration \
+    --values otel-integration/values.yaml                           \
+    --version=0.0.139                                               \
+    --render-subchart-notes				                       	    \
+	--set global.defaultApplicationName=${CX_APPLICATION}	        \
+	--set global.domain=${CX_DOMAIN}		                       	\
+    --set global.clusterName=${CLUSTER}
 
-ready=`kubectl get daemonset coralogix-opentelemetry-agent | awk 'FNR==2{print $4}'`
-until [ $ready -gt 0 ];
-do ready=`kubectl get daemonset coralogix-opentelemetry-agent | awk 'FNR==2{print $4}'`;
-echo "Waiting for otel collector to start" && sleep 2;
-done
+while [[ $(kubectl get pods -l app.kubernetes.io/name=opentelemetry-cluster-collector  -o 'jsonpath={..status.conditions[?(@.type=="Ready")].status}') != "True" ]];
+  do
+    echo "Waiting for otel collector to start" && sleep 2;
+  done
 
-# Install override
-echo "Installing otel collector override"
-helm upgrade \
-        --install otel-coralogix-integration ./otel-integration \
-        --values override-otel.yaml				\
-       	--render-subchart-notes 				\
-	--set global.defaultApplicationName=${CX_APPLICATION}	\
-        --set global.domain=${CX_DOMAIN}			\
-       	--set global.clusterName=${CLUSTER}
-
-# Wait for it to start
-while [[ $(kubectl get pods -l app.kubernetes.io/name=opentelemetry-agent  -o 'jsonpath={..status.conditions[?(@.type=="Ready")].status}') != "True" ]]; do echo "Waiting for otel collector to start" && sleep 2; done
-
-# Create loadbalancer to expose the collector to the internet
 echo
 echo "Creating otel collector loadbalancer for frontend traces"
-kubectl expose deployment my-otel-demo-otelcol  --port=8080 --target-port=4318 --name=${EXPOSENAME} --type=LoadBalancer
-
+# NB: This exposes the collector, not the agent, because kubectl expose doesn't work for daemon sets
+kubectl expose deployment coralogix-opentelemetry-collector --port=8080 --target-port=4318 --name=${EXPOSENAME} --type=LoadBalancer
 
 # Wait for loadbalancer to start
 x=`kubectl get svc ${EXPOSENAME} | grep -c pending`
@@ -81,9 +61,6 @@ do
    x=`kubectl get svc ${EXPOSENAME} | grep -c pending`;
    sleep 1;
 done
-
-# return from otel-integration directory
-popd
 
 # cd into opentelemetry-demo directory
 pushd opentelemetry-demo
