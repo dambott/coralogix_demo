@@ -1,5 +1,5 @@
 ### project specific ###
-helm/opentelemetry-demo
+#helm/opentelemetry-demo
 *.pdf
 
 ### VisualStudioCode ###
