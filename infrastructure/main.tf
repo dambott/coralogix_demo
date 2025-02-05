@@ -15,8 +15,7 @@ data "aws_availability_zones" "available" {
 }
 locals {
   cluster_name = var.cluster_name
-  # RFC 1918 IP ranges supported
-  remote_network_cidr = "172.16.0.0/16"
+  remote_network_cidr = "172.31.0.0/16"
   remote_node_cidr    = cidrsubnet(local.remote_network_cidr, 2, 0)
   remote_pod_cidr     = cidrsubnet(local.remote_network_cidr, 2, 1)
 }
