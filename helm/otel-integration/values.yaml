@@ -5,7 +5,7 @@ global:
   defaultSubsystemName: "integration"
   logLevel: "warn"
   collectionInterval: "30s"
-  version: "0.0.139"
+  version: "0.0.143"
 
   extensions:
     kubernetesDashboard:
@@ -53,7 +53,7 @@ opentelemetry-agent:
   # Processors are added at the end of the pipeline before batching.
   # You cannot use this to add new pipelines, instead use the
   # config.service.pipelines field to add new pipelines.
-  #extraConfig: {}
+  extraConfig: {}
   # extraConfig:
   #   receivers:
   #     otlp/3:
@@ -93,7 +93,7 @@ opentelemetry-agent:
       scrapeInterval: 30s
     image:
       repository: ghcr.io/open-telemetry/opentelemetry-operator/target-allocator
-      tag: v0.114.0
+      tag: v0.117.0
 
   command:
     name: otelcol-contrib
@@ -362,11 +362,11 @@ opentelemetry-agent:
           exporters:
             - coralogix
           processors:
+            - memory_limiter
             - transform/prometheus
             - k8sattributes
             - resourcedetection/env
             - resourcedetection/region
-            - memory_limiter
             - batch
           receivers:
             - otlp
@@ -376,10 +376,10 @@ opentelemetry-agent:
           exporters:
             - coralogix
           processors:
+            - memory_limiter
             - k8sattributes
             - resourcedetection/env
             - resourcedetection/region
-            - memory_limiter
             - batch
           receivers:
             - otlp
@@ -506,7 +506,7 @@ opentelemetry-cluster-collector:
   # You cannot use this to add new pipelines, instead use the
   # config.service.pipelines field to add new pipelines.
   extraConfig: {}
-  #extraConfig:
+  # extraConfig:
   #   receivers:
   #     otlp/3:
   #       protocols:
@@ -522,13 +522,8 @@ opentelemetry-cluster-collector:
   #     spanmetrics/2:
   #       metrics:
   #         enabled: true
-  # service:
-  #   pipelines:
-  #     traces:
-  #       receivers:
-  #         - otlp
-  #       exporters:
-  #         - coralogix
+  #   service:
+  #     pipelines:
   #       logs:
   #         receivers:
   #         - otlp/3
@@ -736,28 +731,25 @@ opentelemetry-cluster-collector:
           exporters:
             - coralogix
           processors:
+            - memory_limiter
             - resource/kube-events
             - transform/kube-events
-            - memory_limiter
             - batch
-          receivers:
-            - otlp
         metrics:
           exporters:
             - coralogix
           processors:
+            - memory_limiter
             - transform/prometheus
             - k8sattributes
             - metricstransform/k8s-dashboard
             - transform/k8s-dashboard
             - resourcedetection/env
             - resourcedetection/region
-            - memory_limiter
             - batch
           receivers:
             - otlp
             - prometheus
-            - k8s_cluster
         traces:
           exporters:
             - coralogix
@@ -1007,12 +999,12 @@ opentelemetry-gateway:
           exporters:
             - coralogix
           processors:
+            - memory_limiter
             - transform/prometheus
             - k8sattributes
             - transform/k8s_attributes
             - resourcedetection/env
             - resourcedetection/region
-            - memory_limiter
             - batch
           receivers:
             - prometheus
@@ -1021,6 +1013,7 @@ opentelemetry-gateway:
             - coralogix
           processors:
             - memory_limiter
+            - tail_sampling
             - batch
           receivers:
             - otlp
@@ -1199,12 +1192,12 @@ opentelemetry-receiver:
           exporters:
             - coralogix
           processors:
+            - memory_limiter
             - transform/prometheus
             - k8sattributes
             - transform/k8s_attributes
             - resourcedetection/env
             - resourcedetection/region
-            - memory_limiter
             - batch
           receivers:
             - prometheus
