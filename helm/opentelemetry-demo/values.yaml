@@ -361,7 +361,7 @@ components:
         value: frontend-web
       # This values will get overwritten by the 1-start.sh script to the correct expose url
       - name: PUBLIC_OTEL_EXPORTER_OTLP_TRACES_ENDPOINT
-        value: http://ab1996e35beb846af81e0bb3bd7c9e7e-1447399581.us-west-2.elb.amazonaws.com:8080/v1/traces
+        value:  http://localhost:8080/otlp-http/v1/traces
           # The amazon url will change when things get setup
           # This is found from :
           # kubectl expose deployment my-otel-demo-otelcol  --port=8080 --target-port=4318 --name=awsexpose2 --type=LoadBalancer
